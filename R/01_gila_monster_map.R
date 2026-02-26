@@ -3,7 +3,7 @@
 # NatGeo Style Species Range Map
 # 
 # Author: Brooks Groves
-# Date: 2025
+# Date: 2026
 # 
 # Description:
 #   Creates a National Geographic editorial style
