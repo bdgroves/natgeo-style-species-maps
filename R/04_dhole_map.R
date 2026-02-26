@@ -1,7 +1,30 @@
 # ============================================
 # Dhole / Asian Wild Dog (Cuon alpinus)
 # NatGeo Style Species Range Map
-# Author: Brooks Groves  |  Date: 2026
+#
+# Author: Brooks Groves
+# Date:   2026
+#
+# Description:
+#   National Geographic editorial style species
+#   range map for the Dhole (Asian Wild Dog).
+#   IUCN Status: Endangered (C2a(i))
+#
+# Data Sources:
+#   Species range: IUCN Red List of Threatened Species
+#     https://www.iucnredlist.org
+#   Base map: Natural Earth / rnaturalearth
+#     https://www.naturalearthdata.com
+#   Photo: Davidvraju / Wikimedia Commons / CC BY-SA 4.0
+#     https://commons.wikimedia.org/wiki/File:Cuon_alpinus.jpg
+#
+# Output:
+#   outputs/dhole_natgeo.png (300 DPI)
+# ============================================
+
+
+# ============================================
+# PACKAGES
 # ============================================
 
 library(tidyverse)
@@ -21,11 +44,13 @@ input_shapefile <- "C:/data/Shapefiles/IUCN/dhole/data_0.shp"
 image_path      <- "C:/data/R_Projects/natgeo-style-species-maps/data/Cuon.alpinus-cut.jpg"
 output_path     <- "C:/data/R_Projects/natgeo-style-species-maps/outputs/dhole_natgeo.png"
 
+# -- Map extent --
 map_xmin <- 62
 map_xmax <- 128
 map_ymin <- -11
 map_ymax <-  45
 
+# -- Palette --
 land_fill      <- "#E4DDD0"
 border_color   <- "#C5B9A8"
 range_fill     <- "#8B6E4E"
@@ -34,18 +59,23 @@ focus_label    <- "#7A6E62"
 context_label  <- "#ADA393"
 species_color  <- "#6B5038"
 ocean_color    <- "#D6E8F0"
+divider_color  <- "#C5B9A8"   # column divider line
 
+# -- Species info --
 common_name     <- "Dhole"
 scientific_name <- "Cuon alpinus"
 data_source     <- "Source: IUCN Red List of Threatened Species"
 map_author      <- "Map by Brooks Groves"
+photo_credit    <- "Photo: Davidvraju / Wikimedia Commons / CC BY-SA 4.0"
 
+# -- Scale bar --
 sb_x          <- 64
 sb_y_mi       <- -8.0
 sb_y_km       <- -9.3
 deg_per_500mi <- 500 / 55
 deg_per_500km <- 500 / 90
 
+# -- Species label anchor --
 label_x <- 63
 label_y <-  2.5
 
@@ -95,20 +125,45 @@ dhole_img  <- image_read(image_path)
 dhole_grob <- rasterGrob(as.raster(dhole_img), interpolate = TRUE)
 
 img_info   <- image_info(dhole_img)
-img_aspect <- img_info$width / img_info$height
-
 message(paste("✓ Image loaded —",
-              img_info$width, "×", img_info$height,
-              "px | aspect ratio:", round(img_aspect, 3)))
+              img_info$width, "×", img_info$height, "px"))
 
 
 # ============================================
 # LABELS
+#
+# Every label placed in open water or clear
+# land — nothing sits on a range polygon.
+# India moved to X=78 to clear left edge.
 # ============================================
 
 focus_labels <- tibble(
-  X = c( 76,  113,   99,  101,  106,  110,  106,  112,   92,   93,   81),
-  Y = c( 18,   30,   21,   14,   21,   16,   11,    3,   25,   28,   29),
+  X = c(
+    78,    # India     — Arabian Sea, clear of left edge
+    113,   # China     — eastern coast
+    99,    # Myanmar
+    101,   # Thailand
+    106,   # Laos
+    110,   # Vietnam
+    106,   # Cambodia
+    112,   # Malaysia  — South China Sea
+    92,    # Bangladesh— Bay of Bengal
+    93,    # Bhutan
+    81     # Nepal
+  ),
+  Y = c(
+    18,    # India
+    30,    # China
+    21,    # Myanmar
+    14,    # Thailand
+    21,    # Laos
+    16,    # Vietnam
+    11,    # Cambodia
+    3,    # Malaysia
+    25,    # Bangladesh
+    28,    # Bhutan
+    29     # Nepal
+  ),
   label = c(
     space_text("India"),
     space_text("China"),
@@ -168,18 +223,29 @@ main_map <- ggplot() +
             color = context_label, size = 2.3,
             lineheight = 0.8) +
   
+  # Species common name
   annotate("text",
            x = label_x, y = label_y,
-           label = paste(common_name, "range"),
-           color = species_color, size = 3.0,
-           hjust = 0, fontface = "bold") +
+           label    = paste(common_name, "range"),
+           color    = species_color, size = 3.0,
+           hjust    = 0, fontface = "bold") +
   
+  # Species scientific name
   annotate("text",
            x = label_x + 0.2, y = label_y - 1.5,
-           label = scientific_name,
-           color = species_color, size = 2.6,
-           hjust = 0, fontface = "italic") +
+           label    = scientific_name,
+           color    = species_color, size = 2.6,
+           hjust    = 0, fontface = "italic") +
   
+  # Range note — explains northern patches
+  annotate("text",
+           x = label_x + 0.2, y = label_y - 2.8,
+           label    = "Includes historical range\nin northern extent",
+           color    = species_color, size = 2.0,
+           hjust    = 0, lineheight = 0.85,
+           fontface = "plain") +
+  
+  # Miles scale bar
   annotate("segment",
            x = sb_x, xend = sb_x + deg_per_500mi,
            y = sb_y_mi, yend = sb_y_mi,
@@ -189,6 +255,7 @@ main_map <- ggplot() +
            label = "500 mi",
            color = "#666666", size = 2.1, hjust = 0) +
   
+  # Km scale bar
   annotate("segment",
            x = sb_x, xend = sb_x + deg_per_500km,
            y = sb_y_km, yend = sb_y_km,
@@ -254,13 +321,17 @@ locator_inset <- ggplot() +
           linewidth = 0.7) +
   
   annotate("text", x = 95, y = 15,
-           label = "MAP\nAREA", color = "white",
-           size = 1.85, fontface = "bold",
+           label      = "MAP\nAREA",
+           color      = "white",
+           size       = 1.85,
+           fontface   = "bold",
            lineheight = 0.85) +
   
   annotate("text", x = 75, y = 63,
-           label = "ASIA", color = "#5A8A9A",
-           size = 2.3, fontface = "bold") +
+           label    = "ASIA",
+           color    = "#5A8A9A",
+           size     = 2.3,
+           fontface = "bold") +
   
   coord_sf(xlim   = c(inset_xmin, inset_xmax),
            ylim   = c(inset_ymin, inset_ymax),
@@ -282,76 +353,68 @@ message("✓ Locator inset built")
 # ============================================
 # PAGE LAYOUT CALCULATIONS
 #
-# All dimensions in mm first, then converted
-# to 0-1 proportions for ggdraw().
+# All sizes derived from content — no guessing.
 #
-# Page width = 240 mm (fixed)
+# Page width   = 240 mm  (fixed)
+# Left col     =  75%    = 180 mm  (main map)
+# Right col    =  25%    =  60 mm  (inset + photo)
 #
-# Left column  = 75% = 180 mm  (main map)
-# Right column = 25% =  60 mm  (inset + photo)
+# Map height   = 180 × (56°lat / 66°lon) = 152.7 mm
+# Title        =  28 mm
+# Attribution  =  16 mm
+# Page height  = 196.7 mm → 197 mm
 #
-# Map height = map_width × (lat_span / lon_span)
-#            = 180 × (56/66) = 152.7 mm
-#
-# Title       =  28 mm  (top)
-# Attribution =  16 mm  (bottom)
-# Page height = 152.7 + 28 + 16 = 196.7 → 197 mm
-#
-# Right column breakdown:
-#   Inset height = col_width × (lat/lon of inset window)
-#                = 60 × (132/160) = 49.5 mm
-#   Gap          =  3 mm
-#   Photo height = map_height - inset_height - gap
-#                = 152.7 - 49.5 - 3 = 100.2 mm
-#   Caption      =  4 mm  (inside photo bottom)
+# Right column (60 mm wide, 152.7 mm tall):
+#   Inset  = 60 × (132/160)  =  49.5 mm
+#   Gap    =   0 mm  (flush)
+#   Photo  = 152.7 - 49.5    = 103.2 mm
+#   Caption sits inside photo bottom margin
 # ============================================
 
 page_w_mm  <- 240
-col_l_frac <- 0.75    # left column fraction
-col_r_frac <- 0.25    # right column fraction
+col_l_frac <- 0.75
+col_r_frac <- 0.25
 
 col_l_mm   <- page_w_mm * col_l_frac   # 180 mm
 col_r_mm   <- page_w_mm * col_r_frac   #  60 mm
 
 map_lat    <- map_ymax - map_ymin       # 56°
 map_lon    <- map_xmax - map_xmin       # 66°
-map_h_mm   <- col_l_mm * (map_lat / map_lon)   # 152.7 mm
+map_h_mm   <- col_l_mm * (map_lat / map_lon)
 
 title_mm   <- 28
 attrib_mm  <- 16
-page_h_mm  <- map_h_mm + title_mm + attrib_mm  # ~197 mm
+page_h_mm  <- map_h_mm + title_mm + attrib_mm
 
 inset_geo_asp <- (inset_ymax - inset_ymin) / (inset_xmax - inset_xmin)
-inset_h_mm    <- col_r_mm * inset_geo_asp       # 49.5 mm
-gap_mm        <- 3
-photo_h_mm    <- map_h_mm - inset_h_mm - gap_mm # 100.2 mm
+inset_h_mm    <- col_r_mm * inset_geo_asp
+photo_h_mm    <- map_h_mm - inset_h_mm   # flush — no gap
 
-message(paste("  Page:", round(page_w_mm), "×", round(page_h_mm), "mm"))
-message(paste("  Map panel:", round(col_l_mm), "×", round(map_h_mm), "mm"))
-message(paste("  Inset:", round(col_r_mm), "×", round(inset_h_mm), "mm"))
-message(paste("  Photo:", round(col_r_mm), "×", round(photo_h_mm), "mm"))
+message(paste("  Page:  ", round(page_w_mm), "×", round(page_h_mm, 1), "mm"))
+message(paste("  Map:   ", round(col_l_mm),  "×", round(map_h_mm,  1), "mm"))
+message(paste("  Inset: ", round(col_r_mm),  "×", round(inset_h_mm,1), "mm"))
+message(paste("  Photo: ", round(col_r_mm),  "×", round(photo_h_mm,1), "mm"))
 
 # Convert to 0-1 canvas proportions
-# ggdraw: (0,0) = bottom-left, (1,1) = top-right
+attrib_p  <- attrib_mm  / page_h_mm
+map_h_p   <- map_h_mm   / page_h_mm
+title_p   <- title_mm   / page_h_mm
+col_l_p   <- col_l_frac
+col_r_p   <- col_r_frac
+inset_h_p <- inset_h_mm / page_h_mm
+photo_h_p <- photo_h_mm / page_h_mm
 
-attrib_p   <- attrib_mm  / page_h_mm
-map_h_p    <- map_h_mm   / page_h_mm
-title_p    <- title_mm   / page_h_mm
-col_r_p    <- col_r_frac
-col_l_p    <- col_l_frac
-inset_h_p  <- inset_h_mm / page_h_mm
-photo_h_p  <- photo_h_mm / page_h_mm
-gap_p      <- gap_mm     / page_h_mm
+# Y anchors (from bottom of canvas)
+map_y     <- attrib_p
+title_y   <- attrib_p + map_h_p
+inset_y   <- attrib_p + map_h_p - inset_h_p  # top of right col
+photo_y   <- attrib_p                          # bottom of right col
 
-# Y anchor positions (from bottom)
-map_y      <- attrib_p                        # map bottom
-title_y    <- attrib_p + map_h_p              # title bottom
-inset_y    <- attrib_p + map_h_p - inset_h_p  # inset bottom
-photo_y    <- attrib_p                        # photo bottom
-# (sits on attribution band)
+# X anchor for right column (small gap after divider)
+col_r_x   <- col_l_p + 0.008
 
-# X anchor positions (from left)
-col_r_x    <- col_l_p + 0.005   # small gap between columns
+# Right column usable width (minus left gap)
+col_r_use <- col_r_p - 0.010
 
 
 # ============================================
@@ -365,6 +428,15 @@ final_map <- ggdraw() +
     gp = grid::gpar(fill = "white", col = NA)
   )) +
   
+  # ── Vertical divider line between columns ──
+  draw_grob(
+    grid::linesGrob(
+      x  = unit(c(col_l_p + 0.003, col_l_p + 0.003), "npc"),
+      y  = unit(c(attrib_p, attrib_p + map_h_p), "npc"),
+      gp = grid::gpar(col = divider_color, lwd = 0.8)
+    )
+  ) +
+  
   # ── Main map — left column ─────────────────
   draw_plot(main_map,
             x      = 0,
@@ -376,22 +448,23 @@ final_map <- ggdraw() +
   draw_plot(locator_inset,
             x      = col_r_x,
             y      = inset_y,
-            width  = col_r_p - 0.005,
+            width  = col_r_use,
             height = inset_h_p) +
   
   # ── Animal photo — right column bottom ─────
+  # Flush under the inset, no gap
   draw_grob(dhole_grob,
             x      = col_r_x,
-            y      = photo_y + 0.008,   # small bottom margin
-            width  = col_r_p - 0.008,
-            height = photo_h_p - gap_p - 0.012) +
+            y      = photo_y + 0.022,   # leave room for caption
+            width  = col_r_use,
+            height = photo_h_p - 0.022) +
   
-  # Photo caption — sits below the image
+  # Photo credit caption
   draw_label(
-    "Dhole (Cuon alpinus)  ·  Photo credit",
+    photo_credit,
     x        = col_r_x,
-    y        = photo_y + 0.003,
-    size     = 5,
+    y        = photo_y + 0.010,
+    size     = 4.8,
     color    = "#AAAAAA",
     hjust    = 0,
     fontface = "italic"
@@ -444,4 +517,6 @@ ggsave(output_path,
        bg     = "white")
 
 message(paste("✓ Exported:", output_path))
+message(paste("  Size:", round(page_w_mm), "×",
+              round(page_h_mm, 1), "mm @ 300 DPI"))
 message("🐕 Done!")
