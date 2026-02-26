@@ -17,6 +17,9 @@ map every week.
 | 6 | Ethiopian Wolf 🐺 | Horn of Africa | R | ✅ Auto |
 | 7 | Red Panda 🐼 | Nepal to China | R | ✅ Auto |
 | 8 | Kakapo 🦜 | New Zealand | R | ✅ Auto |
+| 9 | Chafarinas Skink 🦎 | N. Africa / Mediterranean | R | ✅ Auto |
+| 10 | Verreaux's Sifaka 🐒 | Madagascar | R | ✅ Auto |
+| 11 | Antanosy Day Gecko 🦎 | Madagascar | R | ✅ Auto |
 
 ---
 
@@ -26,7 +29,6 @@ map every week.
 ![Dhole](outputs/dhole_natgeo.png)
 > Endangered. Social pack-hunting wild dog found across
 > India through Southeast Asia to the Indonesian archipelago.
-> IUCN Status: EN C2a(i)
 
 ### Snow Leopard — *Panthera uncia*
 ![Snow Leopard](outputs/snow_leopard_natgeo.png)
@@ -52,6 +54,24 @@ map every week.
 > endemic to New Zealand. One of the world's most
 > intensive conservation programs with ~250 individuals.
 
+### Chafarinas Skink — *Chalcides parallelus*
+![Chafarinas Skink](outputs/chafarinas_skink_natgeo.png)
+> Vulnerable. Small lizard endemic to the Chafarinas
+> Islands off the coast of Morocco in the Mediterranean.
+> Extremely limited range.
+
+### Verreaux's Sifaka — *Propithecus verreauxi*
+![Verreauxs Sifaka](outputs/verreauxs_sifaka_natgeo.png)
+> Critically Endangered. Distinctive dancing lemur
+> of southwestern Madagascar's dry deciduous forests.
+> Threatened by habitat loss and hunting.
+
+### Antanosy Day Gecko — *Phelsuma antanosy*
+![Antanosy Day Gecko](outputs/antanosy_day_gecko_natgeo.png)
+> Endangered. Vibrant green gecko restricted to a tiny
+> area of southeastern Madagascar. One of the most
+> range-restricted reptiles on the island.
+
 ### Gila Monster — *Heloderma suspectum*
 ![Gila Monster](outputs/gila_monster_natgeo.png)
 > Near Threatened. Venomous lizard of the Sonoran
@@ -72,9 +92,9 @@ map every week.
 
 ## Automation Pipeline
 
-Maps 5–8 were built automatically using a reusable
-pipeline. Add a species shapefile + photo, append one
-row to a CSV, and the map builds itself.
+Maps 5–11 were built automatically using a reusable
+pipeline. Add a species shapefile + photo, run one
+command, and the map builds itself.
 
 ### How It Works
 ┌─────────────────────────────────────────────────┐
@@ -103,40 +123,19 @@ Copy
 setwd("C:/data/R_Projects/natgeo-style-species-maps")
 source("R/auto/add_species.R")
 
-# Add a new species (does everything)
 add_species(
-  common_name       = "Snow Leopard",
-  scientific_name   = "Panthera uncia",
-  zip_path          = "path/to/redlist_download.zip",
-  photo_path_source = "path/to/photo.jpg",
+  common_name       = "Species Name",
+  scientific_name   = "Genus species",
+  zip_path          = "C:/data/Shapefiles/IUCN/redlist_download.zip",
+  photo_path_source = "C:/data/Shapefiles/IUCN/photo.jpg",
   photo_credit      = "Photographer / Source / License",
-  palette_type      = "mountain",
+  palette_type      = "jungle",
   continent         = "Asia",
-  iucn_status       = "Vulnerable"
+  iucn_status       = "Endangered"
 )
 
-# Build all unbuilt maps
 source("R/auto/generate_map.R")
 run_queue()
-Batch Add Multiple Species
-rCopysource("R/auto/add_species.R")
-
-batch_add(list(
-  list(
-    common_name = "Ethiopian Wolf",
-    scientific_name = "Canis simensis",
-    zip_path = "path/to/zip",
-    photo_path_source = "path/to/photo.jpg",
-    photo_credit = "Credit / Source / License",
-    palette_type = "savanna",
-    continent = "Africa",
-    iucn_status = "Endangered"
-  ),
-  list(
-    common_name = "Red Panda",
-    # ... etc
-  )
-))
 
 The NatGeo Style
 Key design elements recreated from National Geographic
@@ -144,8 +143,8 @@ editorial species range maps:
 ElementImplementationWarm parchment land#E4DDD0 — #EBE1D1 depending on regionSoft blue ocean#D6E8F0 as panel backgroundSpaced uppercase labelsCustom space_text() functionMuted range colorSpecies-specific earth tone from palette libraryLocator insetFlat WGS-84 regional context mapDual scale barsMiles + km, auto-calculated for latitudeSpecies annotationBold common name + italic scientific nameAnimal photoRight column below locator insetColumn dividerThin rule line between map and sidebarTypographyggplot2 default (Helvetica-style sans-serif)Attribution footerSource + author at 6pt
 
 Color Palettes
-Six palettes available for different habitats and regions:
-PaletteRange ColorHexBest ForDesertTerracotta#D4845AArid / southwestSavannaGolden Ochre#C8A856African grasslandsJungleEarth Brown#8B6E4ETropical AsiaForestSage Green#7A9E6BTemperate woodlandMountainWarm Gray#8C7B6BAlpine / high altitudeOceanSteel Blue#5B8FA8Marine / freshwater
+Six palettes for different habitats and regions:
+PaletteRange ColorHexBest ForDesertTerracotta#D4845AArid / sandy regionsSavannaGolden Ochre#C8A856African grasslandsJungleEarth Brown#8B6E4ETropical AsiaForestSage Green#7A9E6BTemperate woodlandMountainWarm Gray#8C7B6BAlpine / high altitudeOceanSteel Blue#5B8FA8Marine / freshwater
 All palettes share the same warm parchment land fill
 and soft blue ocean — only the range highlight color
 and label tones change.
@@ -202,13 +201,16 @@ Copynatgeo-style-species-maps/
 │   └── bristlecone_pine.qgz       # Bristlecone Pine
 │
 ├── data/
-│   ├── species_queue.csv           # Pipeline queue (5 species)
+│   ├── species_queue.csv           # Pipeline queue (8 species)
 │   ├── Cuon.alpinus-cut.jpg        # Dhole photo
 │   └── photos/
 │       ├── snow_leopard.jpg
 │       ├── ethiopian_wolf.jpg
 │       ├── red_panda.jpg
-│       └── kakapo.jpg
+│       ├── kakapo.jpg
+│       ├── chafarinas_skink.jpg
+│       ├── verreauxs_sifaka.jpg
+│       └── antanosy_day_gecko.jpg
 │
 ├── outputs/
 │   ├── dhole_natgeo.png
@@ -216,6 +218,9 @@ Copynatgeo-style-species-maps/
 │   ├── ethiopian_wolf_natgeo.png
 │   ├── red_panda_natgeo.png
 │   ├── kakapo_natgeo.png
+│   ├── chafarinas_skink_natgeo.png
+│   ├── verreauxs_sifaka_natgeo.png
+│   ├── antanosy_day_gecko_natgeo.png
 │   ├── gila_monster_natgeo.png
 │   ├── wolf_snake_natgeo.png
 │   └── bristlecone_pine_natgeo.png
@@ -228,7 +233,7 @@ Download from https://www.iucnredlist.org (free account required).
 
 
 Data Sources
-DataSourceLicenseSpecies rangesIUCN Red ListFree, not redistributableBase mapsNatural EarthPublic domainDhole photoDavidvraju / WikimediaCC BY-SA 4.0Snow Leopard photoBernard Landgraf / WikimediaCC BY-SA 3.0Ethiopian Wolf photoCharles J. Sharp / WikimediaCC BY-SA 4.0Red Panda photoSunuwargr / WikimediaCC BY-SA 4.0Kakapo photoDOC NZ / WikimediaCC BY 2.0
+DataSourceLicenseSpecies rangesIUCN Red ListFree, not redistributableBase mapsNatural EarthPublic domainDhole photoDavidvraju / WikimediaCC BY-SA 4.0Snow Leopard photoBernard Landgraf / WikimediaCC BY-SA 3.0Ethiopian Wolf photoCharles J. Sharp / WikimediaCC BY-SA 4.0Red Panda photoSunuwargr / WikimediaCC BY-SA 4.0Kakapo photoDOC NZ / WikimediaCC BY 2.0Verreaux's Sifaka photoKevin Gepford / WikimediaCC BY-SA 4.0Chafarinas Skink photoEarth.comEditorial useAntanosy Day Gecko photoEarth.comEditorial use
 
 R Package Dependencies
 rCopyinstall.packages(c(
@@ -242,11 +247,7 @@ rCopyinstall.packages(c(
 
 How to Reproduce
 Auto Pipeline (recommended)
-rCopy# 1. Download species shapefile from IUCN Red List
-# 2. Find CC-licensed photo on Wikimedia Commons
-# 3. Run:
-
-setwd("path/to/natgeo-style-species-maps")
+rCopysetwd("path/to/natgeo-style-species-maps")
 source("R/auto/add_species.R")
 
 add_species(
@@ -255,19 +256,23 @@ add_species(
   zip_path          = "path/to/iucn_download.zip",
   photo_path_source = "path/to/photo.jpg",
   photo_credit      = "Photographer / Source / License",
-  palette_type      = "jungle",   # desert|savanna|jungle|forest|mountain|ocean
+  palette_type      = "jungle",
   continent         = "Asia",
   iucn_status       = "Endangered"
 )
 
 source("R/auto/generate_map.R")
 run_queue()
+Palette Options
+Copydesert   → arid / sandy regions
+savanna  → African grasslands
+jungle   → tropical Asia
+forest   → temperate woodland
+mountain → alpine / high altitude
+ocean    → marine / freshwater
 Hand-Crafted Maps
-rCopy# Dhole (hand-tuned labels, custom layout)
-source("R/dhole.R")
-
-# Gila Monster
-source("R/gila_monster.R")
+rCopysource("R/dhole.R")          # Dhole — custom labels + layout
+source("R/gila_monster.R")   # Gila Monster
 QGIS Maps
 Open the .qgz project files in QGIS 3.x.
 Data layers use relative paths — place shapefiles
@@ -287,4 +292,3 @@ Planned Features
 A personal cartography project by Brooks Groves.
 Maps produced with open source tools — R and QGIS.
 Pipeline automation built with ggplot2, sf, cowplot, and magick.
-Add to Conversation
